@@ -1,11 +1,16 @@
 import cv2
 import threading
+import queue
 
 class ObjDetect(threading.Thread) :
+    frame_queue = queue.Queue()
     def __init__(self):
         super().__init__()
         print("[DEBUG] : Initialisation du thread ObjDetect")
-        self.classNames = ["Arrière Plan", "Avion", "Vélo", "Oiseau", "Bateau", "Bouteille", "Bus", "Voiture", "Chat", "Chaise", "Vache", "Table", "Chien", "Cheval", "Moto", "Personne", "Plante en pot", "Mouton", "Canapé", "Train", "Ecran"]
+        self.classNames = ["background", "aeroplane", "bicycle", "bird", "boat",
+            "bottle", "bus", "car", "cat", "chaise", "cow", "diningtable",
+            "dog", "horse", "motorbike", "personne", "pottedplant", "sheep",
+            "sofa", "train", "tvmonitor"]
         self.net = cv2.dnn.readNetFromCaffe("MobileNetSSD_deploy.prototxt.txt", "MobileNetSSD_deploy.caffemodel")
         
     def run(self):
@@ -13,7 +18,7 @@ class ObjDetect(threading.Thread) :
         from Live import Live
 
         while Main.mode == "objDetect":
-            frame = Live.frame
+            frame = Live.frame_queue.get()
 
             # Resize de l'image pour avoir une largeur de 400 max
             frame_resized = cv2.resize(frame, (300,300))
@@ -34,9 +39,8 @@ class ObjDetect(threading.Thread) :
             for i in range(detections.shape[2]):
                 #Extraction de la probabilité
                 confidence = detections[0, 0, i, 2]
-
                 #Filtrage avec un seuil
-                if confidence > 0.75:
+                if confidence > 0.7:
                     #Extraction de l'ID de classe
                     class_id = int(detections[0, 0, i, 1])
 
@@ -65,8 +69,5 @@ class ObjDetect(threading.Thread) :
                     yLeftBottom = max(yLeftBottom, labelSize[1])
                     cv2.rectangle(frame, (xLeftBottom, yLeftBottom - labelSize[1]),(xLeftBottom + labelSize[0], yLeftBottom + baseLine),(255, 255, 255), cv2.FILLED)
                     cv2.putText(frame, label, (xLeftBottom, yLeftBottom),cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 0, 0),2)
-
-            #Affichage
-            cv2.imshow("ObjDetect", frame)
-        cv2.destroyWindows("ObjDetect")
+                    self.frame_queue.put(frame)
     
