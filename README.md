@@ -5,7 +5,7 @@ Launch :
   - python Main.py
 
 Command :
-  - s : start/stop
-  - l : enter live mode (default)
-  - f : enter face detect mode
+  - l : enter live mode 
+  - f : enter face detect mode (default)
   - o : enter object detect mode (Supported : Background, Plane, Bike, Bird, Boat, Bottle, Bus, Car, Cat, Chair, Cow, Table, Dog, Horse, Motorbike, Person, Plant, Sheep, Sofa, Train, Monitor)
+  - q ; quit
